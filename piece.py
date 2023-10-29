@@ -1,16 +1,24 @@
 import pygame as pg
-from constants import SQUARE_SIZE
+from constants import SQUARE_SIZE, WHITE, BROWN, GRAY
 
 class Piece:
     PADDING = 15
     OUTLINE = 2
-    def __init__(self, color, x, y):
+    def __init__(self, color, row, col):
         self.color = color
         self.radius = SQUARE_SIZE//2 - self.PADDING
-        self.x = x
-        self.y = y
+        self.row = row
+        self.col = col
+
+
 
     def draw(self, surface):
         pg.draw.circle(surface, self.color,
-                       (self.x*SQUARE_SIZE+self.PADDING, self.y*SQUARE_SIZE+self.PADDING),
+                       (SQUARE_SIZE*self.col + SQUARE_SIZE//2, SQUARE_SIZE*self.row + SQUARE_SIZE//2),
                        self.radius + self.OUTLINE)
+
+        pg.draw.circle(surface, GRAY,
+                       (SQUARE_SIZE*self.col + SQUARE_SIZE//2, SQUARE_SIZE*self.row + SQUARE_SIZE//2),
+                       self.radius, self.OUTLINE, True)
+
+
