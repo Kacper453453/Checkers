@@ -23,7 +23,7 @@ class GameManager:
 def main():
     gm = GameManager()
     board = Board()
-    board.set_up_pieces()
+    # board.set_up_pieces()
 
     run = True
     while run:
@@ -31,9 +31,8 @@ def main():
             if event.type == pg.QUIT:
                 run = False
 
-        board.draw()
-        board.display(gm.screen)
-        board.draw_pieces(gm.screen)
+        board.draw(gm.screen)
+        # board.draw_pieces(gm.screen)
         gm.loop()
 
 
