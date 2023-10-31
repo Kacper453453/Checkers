@@ -1,6 +1,6 @@
 import pygame as pg
 from board import Board
-from constants import SQUARE_SIZE
+from constants import SQUARE_SIZE, WHITE, BROWN, COLS, ROWS
 
 
 pg.init()
@@ -17,6 +17,7 @@ class GameManager:
 
         self.board = Board()
         self.board.set_up_pieces()
+        self.active_piece = None
 
     def loop(self):
         self.board.draw(self.screen)
@@ -26,20 +27,59 @@ class GameManager:
         self.clock.tick(60)
 
     def handle_click(self, event):
-        if event.type == pg.MOUSEBUTTONDOWN:
-            pos  = pg.mouse.get_pos()
 
-            row = (pos[1] // SQUARE_SIZE)
-            col = (pos[0] // SQUARE_SIZE)
+                pos  = pg.mouse.get_pos()
+
+                row = (pos[1] // SQUARE_SIZE)
+                col = (pos[0] // SQUARE_SIZE)
 
 
 
-            self.board.selected = (row, col)
-            print(self.board.selected)
+                self.board.selected = (row, col)
+
+                if self.board.board[row][col] != 0:
+                    self.active_piece = self.board.board[row][col]
+                    self.board.board[row][col].selected = True
+                    self._check_possible_moves(row, col)
+
+    def move_piece(self):
+        pass
+
+
+
+
+
+
+    def _check_possible_moves(self, row, col):
+        piece = self.board.board[row][col]
+        possible_moves = []
+        print('cords: ', (row, col))
+
+        if piece.color == WHITE:
+            #check move right (out perspective)
+            if col + 1 < COLS and row + 1 < ROWS and self.board.board[row+1][col+1] == 0:
+                possible_moves.append((row+1, col+1))
+
+            #check move left
+            if col - 1 >= 0 and row + 1 < ROWS and  self.board.board[row+1][col-1] == 0:
+                possible_moves.append((row+1, col-1))
+
+        else:
+            # check move right (out perspective)
+            if col + 1 < COLS and row - 1 >= 0 and self.board.board[row - 1][col + 1] == 0:
+                possible_moves.append((row - 1, col + 1))
+
+            # check move left
+            if col - 1 >= 0 and row - 1 >= 0 and self.board.board[row - 1][col - 1] == 0:
+                possible_moves.append((row - 1, col - 1))
+
+
+        self.board.draw_possible_moves(possible_moves)
 
 
 def main():
     gm = GameManager()
+    print(gm.board.board)
 
     run = True
     while run:
@@ -47,7 +87,17 @@ def main():
             if event.type == pg.QUIT:
                 run = False
 
-            gm.handle_click(event)
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    gm.handle_click(event)
+                    gm.move_piece()
+            elif event.type == pg.MOUSEBUTTONUP:
+                gm.active_piece = None
+
+            if gm.active_piece != None:
+                gm.active_piece.pos = pg.mouse.get_pos()
+
+
 
 
         gm.loop()

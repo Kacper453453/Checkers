@@ -1,34 +1,30 @@
 import pygame as pg
 from piece import Piece
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, ROWS, COLS, SQUARE_SIZE, WHITE, BROWN, LIGHT_GREEN
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, ROWS, COLS, SQUARE_SIZE, WHITE, BROWN, LIGHT_GREEN, BLACK, LIGHT_BROWN
 
 
 class Board:
-    COLOR1 = (0, 0, 0)
-    COLOR2 = (240, 190, 130)
     def __init__(self):
         self.board_surface = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.board = []
-        self.pieces = []
         self.selected = None
     def draw(self, surface):
         for row in range(ROWS):
             for col in range(COLS):
                 if col % 2 == ((row +  1) % 2):
-                    if self.selected:
-                        if (row, col) == self.selected:
-                            pg.draw.rect(surface, LIGHT_GREEN,
-                                         (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-                        else:
-                            pg.draw.rect(surface, self.COLOR1,
-                                         (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-                    else:
-                        pg.draw.rect(surface, self.COLOR1,
-                                     (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-
-                else:
-                    pg.draw.rect(surface, self.COLOR2,
+                    pg.draw.rect(surface, BLACK,
                                  (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+
+                    # highlight selected square
+                    if (row, col) == self.selected:
+                        pg.draw.rect(surface, LIGHT_GREEN,
+                                     (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                else:
+                    pg.draw.rect(surface, LIGHT_BROWN,
+                                 (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+
+    def draw_possible_moves(self, moves):
+        pass
 
 
     def set_up_pieces(self):
