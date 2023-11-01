@@ -15,8 +15,9 @@ class Piece:
 
 
     def draw(self, surface):
-            pg.draw.circle(surface, self.color, (self.pos[0], self.pos[1]), self.radius + self.OUTLINE)
-            pg.draw.circle(surface, GRAY, (self.pos[0], self.pos[1]),
-                           self.radius, self.OUTLINE, True)
+
+        pg.draw.circle(surface, self.color, (self.pos[0], self.pos[1]), self.radius + self.OUTLINE)
+        pg.draw.circle(surface, GRAY, (self.pos[0], self.pos[1]),
+                       self.radius, self.OUTLINE, True)
 
 

@@ -26,26 +26,42 @@ class GameManager:
         pg.display.flip()
         self.clock.tick(60)
 
+
+
+    def calculate_board_possition(self, x, y):
+        row = (y // SQUARE_SIZE)
+        col = (x // SQUARE_SIZE)
+        return row, col
+
+
     def handle_click(self, event):
-
                 pos  = pg.mouse.get_pos()
+                row, col = self.calculate_board_possition(pos[0], pos[1])
 
-                row = (pos[1] // SQUARE_SIZE)
-                col = (pos[0] // SQUARE_SIZE)
-
-
-
-                self.board.selected = (row, col)
+                self.board.selected = (row, col) #highlight square
 
                 if self.board.board[row][col] != 0:
                     self.active_piece = self.board.board[row][col]
-                    self.board.board[row][col].selected = True
+
                     self._check_possible_moves(row, col)
 
-    def move_piece(self):
-        pass
+    def update_position(self):
+        if self.active_piece:
+            old_row = self.active_piece.row
+            old_col = self.active_piece.col
 
+            pos = pg.mouse.get_pos()
 
+            new_row, new_col = self.calculate_board_possition(pos[0], pos[1])
+
+            self.active_piece.row = new_row
+            self.active_piece.col = new_col
+
+            self.board.board[old_row][old_col] = 0
+            self.board.board[new_row][new_col] = self.active_piece
+
+            self.active_piece.pos = (SQUARE_SIZE * new_col + SQUARE_SIZE // 2,
+               SQUARE_SIZE * new_row + SQUARE_SIZE // 2)
 
 
 
@@ -53,7 +69,6 @@ class GameManager:
     def _check_possible_moves(self, row, col):
         piece = self.board.board[row][col]
         possible_moves = []
-        print('cords: ', (row, col))
 
         if piece.color == WHITE:
             #check move right (out perspective)
@@ -79,7 +94,6 @@ class GameManager:
 
 def main():
     gm = GameManager()
-    print(gm.board.board)
 
     run = True
     while run:
@@ -87,18 +101,17 @@ def main():
             if event.type == pg.QUIT:
                 run = False
 
-            if event.type == pg.MOUSEBUTTONDOWN:
+            elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     gm.handle_click(event)
-                    gm.move_piece()
+
             elif event.type == pg.MOUSEBUTTONUP:
+                gm.update_position()
                 gm.active_piece = None
 
-            if gm.active_piece != None:
-                gm.active_piece.pos = pg.mouse.get_pos()
-
-
-
+            elif event.type == pg.MOUSEMOTION:
+                if gm.active_piece != None:
+                    gm.active_piece.pos = pg.mouse.get_pos()
 
         gm.loop()
 
