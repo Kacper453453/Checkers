@@ -1,11 +1,10 @@
 import pygame as pg
 from piece import Piece
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, ROWS, COLS, SQUARE_SIZE, WHITE, BROWN, LIGHT_GREEN, BLACK, LIGHT_BROWN
+from constants import ROWS, COLS, SQUARE_SIZE, WHITE, BROWN, LIGHT_GREEN, BLACK, LIGHT_BROWN
 
 
 class Board:
     def __init__(self):
-        self.board_surface = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.board = []
         self.selected = None
     def draw(self, surface):
@@ -25,6 +24,11 @@ class Board:
 
     def draw_possible_moves(self, moves):
         pass
+
+    def calculate_board_possition(self, x, y):
+        row = (y // SQUARE_SIZE)
+        col = (x // SQUARE_SIZE)
+        return row, col
 
 
     def set_up_pieces(self):
