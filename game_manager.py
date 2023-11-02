@@ -12,6 +12,8 @@ class GameManager:
         self.board.set_up_pieces()
         self.active_piece = None
 
+        self.white_turn = True
+
     def loop(self):
         self.board.draw(self.screen)
         self.board.draw_pieces(self.screen)
@@ -25,8 +27,9 @@ class GameManager:
                 self.handle_click()
 
         elif event.type == pg.MOUSEBUTTONUP:
-            self.update_position()
-            self.active_piece = None
+            if self.active_piece != None:
+                self.update_position()
+                self.active_piece = None
 
         elif event.type == pg.MOUSEMOTION:
             if self.active_piece != None:
@@ -46,7 +49,12 @@ class GameManager:
                 self.board.selected = (row, col) #highlight square
 
                 if self.board.board[row][col] != 0:
-                    self.active_piece = self.board.board[row][col]
+                    if self.white_turn:
+                        if self.board.board[row][col].color == WHITE:
+                            self.active_piece = self.board.board[row][col]
+                    else:
+                        if self.board.board[row][col].color != WHITE:
+                            self.active_piece = self.board.board[row][col]
 
 
     def update_position(self):
@@ -68,31 +76,65 @@ class GameManager:
 
             self.active_piece.pos = (SQUARE_SIZE * new_col + SQUARE_SIZE // 2,
                SQUARE_SIZE * new_row + SQUARE_SIZE // 2)
+            self.white_turn = not self.white_turn
         else:
             self.active_piece.pos = (SQUARE_SIZE * old_col + SQUARE_SIZE // 2,
                SQUARE_SIZE * old_row + SQUARE_SIZE // 2)
 
 
+        self.board.selected = None
+
+
     def _check_possible_moves(self, row, col):
         piece = self.board.board[row][col]
         possible_moves = []
+        possible_captures = []
 
         if piece.color == WHITE:
-            #check move right (out perspective)
-            if col + 1 < COLS and row + 1 < ROWS and self.board.board[row+1][col+1] == 0:
-                possible_moves.append((row+1, col+1))
+            #check move right and right capture(out perspective)
+            if col + 1 < COLS and row + 1 < ROWS:
+                if self.board.board[row+1][col+1] == 0:
+                    possible_moves.append((row+1, col+1))
+                elif row + 2 < ROWS and col + 2 < COLS:
+                    if self.board.board[row+2][col+2] == 0:
 
-            #check move left
-            if col - 1 >= 0 and row + 1 < ROWS and  self.board.board[row+1][col-1] == 0:
-                possible_moves.append((row+1, col-1))
+                        possible_moves.append((row+2, col+2))
+
+            #check move left and left capture
+            if col - 1 >= 0 and row + 1 < ROWS:
+                if self.board.board[row+1][col-1] == 0:
+                    possible_moves.append((row+1, col-1))
+
+                elif row + 2 < ROWS and col - 2 >= 0:
+                    if self.board.board[row+2][col-2] == 0:
+                        #left capture
+
+                        possible_moves.append((row+2, col-2))
+
 
         else:
-            # check move right (out perspective)
-            if col + 1 < COLS and row - 1 >= 0 and self.board.board[row - 1][col + 1] == 0:
-                possible_moves.append((row - 1, col + 1))
+            # check move right and right capture (out perspective)
+            if col + 1 < COLS and row - 1 >= 0:
+                if  self.board.board[row - 1][col + 1] == 0:
+                    possible_moves.append((row - 1, col + 1))
+
+                elif row - 2 >= 0 and col + 2 < COLS:
+                    if self.board.board[row-2][col+2] == 0:
+                        #right capture
+
+                        possible_moves.append((row-2, col+2))
 
             # check move left
-            if col - 1 >= 0 and row - 1 >= 0 and self.board.board[row - 1][col - 1] == 0:
-                possible_moves.append((row - 1, col - 1))
+            if col - 1 >= 0 and row - 1 >= 0:
+                if self.board.board[row - 1][col - 1] == 0:
+                    possible_moves.append((row - 1, col - 1))
+
+                elif row - 2 >= 0 and col - 2 >= 0:
+                    if self.board.board[row-2][col-2] == 0:
+                        #left capture
+
+                        possible_moves.append((row-2, col-2))
+
+        print(possible_moves)
 
         return possible_moves
