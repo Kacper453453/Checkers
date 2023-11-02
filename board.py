@@ -3,6 +3,7 @@ from piece import Piece
 from constants import ROWS, COLS, SQUARE_SIZE, WHITE, BROWN, LIGHT_GREEN, BLACK, LIGHT_BROWN
 
 
+
 class Board:
     def __init__(self):
         self.board = []
@@ -33,23 +34,33 @@ class Board:
 
     def set_up_pieces(self):
         for row in range(ROWS):
-            self.board.append([])
-            for col in range(COLS):
-                if col % 2 == ((row + 1) % 2):
+            board_row = {}
+            for col, l in enumerate(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']):
+                if col % 2 == ((row +  1) % 2):
                     if row < 3:
-                        self.board[row].append(Piece(WHITE, row, col))
+                        board_row[l] = Piece(WHITE, row, col)
                     elif row > 4:
-                        self.board[row].append(Piece(BROWN, row, col))
+                        board_row[l] = Piece(BROWN, row, col)
                     else:
-                        self.board[row].append(0)
+                        board_row[l] = 0
                 else:
-                    self.board[row].append(0)
+                    board_row[l] = 0
+
+            self.board.append(board_row)
+        print(self.board)
+
+
+
+
+
+
+
 
     def draw_pieces(self, surface):
         for row in range(ROWS):
-            for col in range(COLS):
-                if self.board[row][col] != 0:
-                    piece = self.board[row][col]
+            for l in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
+                if self.board[row][l] != 0:
+                    piece = self.board[row][l]
                     piece.draw(surface)
 
 

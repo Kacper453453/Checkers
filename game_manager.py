@@ -38,7 +38,7 @@ class GameManager:
 
     def calculate_board_possition(self, x, y):
         row = (y // SQUARE_SIZE)
-        col = (x // SQUARE_SIZE)
+        col = 'abcdefgh'[(x // SQUARE_SIZE)]
         return row, col
 
 
@@ -59,7 +59,7 @@ class GameManager:
 
     def update_position(self):
         old_row = self.active_piece.row
-        old_col = self.active_piece.col
+        old_col = 'abcdefgh'[self.active_piece.col]
 
         possible_moves = self._check_possible_moves(old_row, old_col)
 
@@ -85,28 +85,28 @@ class GameManager:
         self.board.selected = None
 
 
-    def _check_possible_moves(self, row, col):
-        piece = self.board.board[row][col]
+    def _check_possible_moves(self, row, col_l):
+        col_num = self.board.board[row].keys().index(col_l)
+        piece = self.board.board[row][col_l]
         possible_moves = []
-        possible_captures = []
 
         if piece.color == WHITE:
             #check move right and right capture(out perspective)
-            if col + 1 < COLS and row + 1 < ROWS:
-                if self.board.board[row+1][col+1] == 0:
-                    possible_moves.append((row+1, col+1))
-                elif row + 2 < ROWS and col + 2 < COLS:
-                    if self.board.board[row+2][col+2] == 0:
+            if col_num + 1 < COLS and row + 1 < ROWS:
+                if self.board.board[row+1][col_num+1] == 0:
+                    possible_moves.append((row+1, col_num+1))
+                elif row + 2 < ROWS and col_num + 2 < COLS:
+                    if self.board.board[row+2][col_num+2] == 0:
 
-                        possible_moves.append((row+2, col+2))
+                        possible_moves.append((row+2, col_num+2))
 
             #check move left and left capture
-            if col - 1 >= 0 and row + 1 < ROWS:
-                if self.board.board[row+1][col-1] == 0:
-                    possible_moves.append((row+1, col-1))
+            if col_num - 1 >= 0 and row + 1 < ROWS:
+                if self.board.board[row+1][col_num-1] == 0:
+                    possible_moves.append((row+1, col_num-1))
 
-                elif row + 2 < ROWS and col - 2 >= 0:
-                    if self.board.board[row+2][col-2] == 0:
+                elif row + 2 < ROWS and col_num - 2 >= 0:
+                    if self.board.board[row+2][col_num-2] == 0:
                         #left capture
 
                         possible_moves.append((row+2, col-2))
