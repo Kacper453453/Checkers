@@ -1,11 +1,12 @@
 import pygame as pg
 from piece import Piece
-from constants import ROWS, COLS, SQUARE_SIZE, WHITE, BROWN, LIGHT_GREEN, BLACK, LIGHT_BROWN
+from constants import ROWS, COLS, SQUARE_SIZE, LIGHT_GREEN, BLACK, LIGHT_BROWN, BOARD_SIZE, COLOR_UP, COLOR_DOWN
 
 
 
 class Board:
     def __init__(self):
+        self.board_surface = pg.Surface([BOARD_SIZE, BOARD_SIZE])
         self.board = []
         self.selected = None
     def draw(self, surface):
@@ -34,33 +35,25 @@ class Board:
 
     def set_up_pieces(self):
         for row in range(ROWS):
-            board_row = {}
-            for col, l in enumerate(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']):
+            board_row = []
+            for col in range(COLS):
                 if col % 2 == ((row +  1) % 2):
                     if row < 3:
-                        board_row[l] = Piece(WHITE, row, col)
+                        board_row.append(Piece(row, col, True))
                     elif row > 4:
-                        board_row[l] = Piece(BROWN, row, col)
+                        board_row.append(Piece(row, col, False))
                     else:
-                        board_row[l] = 0
+                        board_row.append(0)
                 else:
-                    board_row[l] = 0
+                    board_row.append(0)
 
             self.board.append(board_row)
-        print(self.board)
-
-
-
-
-
-
-
 
     def draw_pieces(self, surface):
         for row in range(ROWS):
-            for l in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
-                if self.board[row][l] != 0:
-                    piece = self.board[row][l]
+            for col in range(COLS):
+                if self.board[row][col] != 0:
+                    piece = self.board[row][col]
                     piece.draw(surface)
 
 

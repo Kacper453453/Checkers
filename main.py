@@ -1,5 +1,5 @@
 import pygame as pg
-from game_manager import GameManager
+from game import GameManager
 pg.init()
 
 def main():
