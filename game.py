@@ -21,6 +21,8 @@ class GameManager:
         pg.display.flip()
         self.clock.tick(60)
 
+
+
     def handle_event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1:
@@ -30,6 +32,8 @@ class GameManager:
             if self.active_piece != None:
                 self.update_position()
                 self.active_piece = None
+
+
 
         elif event.type == pg.MOUSEMOTION:
             if self.active_piece != None:
@@ -42,13 +46,79 @@ class GameManager:
 
                 self.board.selected = (row, col) #highlight square
 
-
-                if self.board.board[row][col] != 0:
-                    if self.board.board[row][col].up == self.up:
-
+                if self.board.board[row][col] != 0 and self.board.board[row][col].up == self.up:
+                    mandatory_jumps = self.check_mandatory_jump()
+                    if mandatory_jumps:
+                        if (row, col) in mandatory_jumps:
+                            self.active_piece = self.board.board[row][col]
+                    else:
                         self.active_piece = self.board.board[row][col]
-                        self.possible_moves = self._check_possible_moves(row, col)  # -> ['-32'] or ['x32]
 
+    def check_mandatory_jump(self):
+        pieces = []
+        for row in range(ROWS):
+            for col in range(COLS):
+                if self.board.board[row][col] != 0 and self.board.board[row][col].up == self.up:
+                    if self.possible_captures(row, col):
+                        pieces.append((row, col))
+
+        return pieces
+
+
+
+    def possible_captures(self, row, col, king=False):
+        captures = []
+
+        if self.up:
+            if row + 2 < ROWS and col + 2 < COLS:
+                #right capture
+                if self.board.board[row+1][col+1] != 0 and self.board.board[row+1][col+1].up != self.up \
+                        and self.board.board[row+2][col+2] == 0:
+                   captures.append((row+2, col+2))
+            if row + 2 < ROWS and col - 2 >= 0:
+                #left capture
+                if self.board.board[row+1][col-1] != 0 and self.board.board[row+1][col-1].up != self.up \
+                        and self.board.board[row+2][col-2] == 0:
+                    captures.append((row + 2, col - 2))
+
+            if king:
+                if row - 2 >= 0 and col + 2 < COLS:
+                    # right capture
+                    if self.board.board[row - 1][col + 1] != 0 and self.board.board[row + 1][col + 1].up != self.up \
+                            and self.board.board[row - 2][col + 2] == 0:
+                        captures.append((row - 2, col + 2))
+                if row - 2 >= 0 and col - 2 >= 0:
+                    # left capture
+                    if self.board.board[row - 1][col - 1] != 0 and self.board.board[row - 1][col - 1].up != self.up \
+                            and self.board.board[row - 2][col - 2] == 0:
+                        captures.append((row - 2, col - 2))
+
+        else:
+            if row - 2 >= 0 and col + 2 < COLS:
+                # right capture
+                if self.board.board[row - 1][col + 1] != 0 and self.board.board[row - 1][col + 1].up != self.up \
+                        and self.board.board[row - 2][col + 2] == 0:
+                    captures.append((row - 2, col + 2))
+            if row - 2 >= 0 and col - 2 >= 0:
+                # left capture
+                if self.board.board[row - 1][col - 1] != 0 and self.board.board[row - 1][col - 1].up != self.up \
+                        and self.board.board[row - 2][col - 2] == 0:
+                    captures.append((row - 2, col - 2))
+
+            if king:
+                if row + 2 >= ROWS and col + 2 < COLS:
+                    # right capture
+                    if self.board.board[row + 1][col + 1] != 0 and self.board.board[row + 1][col + 1].up != self.up \
+                            and self.board.board[row + 2][col + 2] == 0:
+                        captures.append((row - 2, col + 2))
+                if row + 2 < ROWS and col - 2 >= 0:
+                    # left capture
+                    if self.board.board[row - 1][col - 1] != 0 and self.board.board[row - 1][col - 1].up != self.up \
+                            and self.board.board[row - 2][col - 2] == 0:
+                        captures.append((row - 2, col - 2))
+
+        return captures
+    
 
     def update_position(self):
         old_row = self.active_piece.row
@@ -57,11 +127,32 @@ class GameManager:
         pos = pg.mouse.get_pos()
         new_row, new_col = ((pos[1] // SQUARE_SIZE), (pos[0] // SQUARE_SIZE))
 
+        normal_moves = self.posible_moves(old_row, old_col)
+        capturing_moves = self.possible_captures(old_row, old_col)
 
-        new_pos_notation = self._covert_notation((old_row, old_col), (new_row, new_col))
+        print('Normal: ', normal_moves)
+        print('Capturing: ', capturing_moves)
 
-        if new_pos_notation in self.possible_moves:
 
+        if len(capturing_moves) > 0:
+            if (new_row, new_col) in capturing_moves:
+                self.active_piece.row = new_row
+                self.active_piece.col = new_col
+
+                self.board.board[old_row][old_col] = 0
+                self.board.board[new_row][new_col] = self.active_piece
+
+                self.active_piece.pos = (SQUARE_SIZE * new_col + SQUARE_SIZE // 2,
+                                         SQUARE_SIZE * new_row + SQUARE_SIZE // 2)
+                self.board.board[(old_row + new_row) // 2][(old_col + new_col) // 2] = 0
+
+                if not self.possible_captures(new_row, new_col, self.up):
+                    self.up = not self.up
+            else:
+                self.active_piece.pos = (SQUARE_SIZE * old_col + SQUARE_SIZE // 2,
+                                         SQUARE_SIZE * old_row + SQUARE_SIZE // 2)
+
+        elif (new_row, new_col) in normal_moves:
             self.active_piece.row = new_row
             self.active_piece.col = new_col
 
@@ -69,94 +160,57 @@ class GameManager:
             self.board.board[new_row][new_col] = self.active_piece
 
             self.active_piece.pos = (SQUARE_SIZE * new_col + SQUARE_SIZE // 2,
-               SQUARE_SIZE * new_row + SQUARE_SIZE // 2)
+                                     SQUARE_SIZE * new_row + SQUARE_SIZE // 2)
 
+            self.up = not self.up
 
-
-            if new_pos_notation[0] =='x':
-                self.board.board[(old_row + new_row)//2][(old_col + new_col)//2] = 0
-
-                if not self.possible_captures(new_row, new_col, self.up):
-                    self.up = not self.up
-            else:
-                self.up = not self.up
 
         else:
             self.active_piece.pos = (SQUARE_SIZE * old_col + SQUARE_SIZE // 2,
-               SQUARE_SIZE * old_row + SQUARE_SIZE // 2)
+                                     SQUARE_SIZE * old_row + SQUARE_SIZE // 2)
 
         self.board.selected = None
 
 
-
-    def _covert_notation(self, old, new):
-        if abs(old[0] - new[0]) > 1:
-            return f'x{new[0]}{new[1]}'
-        else:
-            return f'-{new[0]}{new[1]}'
-
-    def possible_captures(self, row, col, up: bool):
-        captures = []
-        color = self.active_piece.color
-
-        if up:
-            if row + 2 < ROWS and col + 2 < COLS:
-                #right capture
-                if self.board.board[row+1][col+1] != 0 and self.board.board[row+1][col+1].color != color \
-                        and self.board.board[row+2][col+2] == 0:
-                   captures.append(self._covert_notation((row, col), (row+2, col+2)))
-            if row + 2 < ROWS and col - 2 >= 0:
-                #left capture
-                if self.board.board[row+1][col-1] != 0 and self.board.board[row+1][col-1].color != color \
-                        and self.board.board[row+2][col-2] == 0:
-                    captures.append(self._covert_notation((row, col), (row + 2, col - 2)))
-        else:
-            if row - 2 >= 0 and col + 2 < COLS:
-                # right capture
-                if self.board.board[row - 1][col + 1] != 0 and self.board.board[row - 1][col + 1].color != color \
-                        and self.board.board[row - 2][col + 2] == 0:
-                    captures.append(self._covert_notation((row, col), (row - 2, col + 2)))
-            if row - 2 >= 0 and col -2 >= 0:
-                # left capture
-                if self.board.board[row - 1][col - 1] != 0 and self.board.board[row - 1][col - 1].color != color \
-                        and self.board.board[row - 2][col - 2] == 0:
-                    captures.append(self._covert_notation((row, col), (row - 2, col - 2)))
-
-        return captures
-
-
-    def _check_possible_moves(self, row, col):
-        '''notation -> -22 - means row=row col=col moves to row=2 col=2
-                        x22 - means row=row col=col captures row=2 col=2'''
-
-        piece = self.active_piece
+    def posible_moves(self, row, col, king=False):
         possible_moves = []
-        possible_captures = self.possible_captures(row, col, piece.up)
-
-        if len(possible_captures) > 0:
-            return possible_captures
-
 
         if self.up:
             # check normal moves
             #right move
             if row + 1 < ROWS and col + 1 < COLS:
                 if self.board.board[row+1][col+1] == 0:
-                    possible_moves.append(f'-{row+1}{col+1}')
+                    possible_moves.append((row+1, col+1))
 
             #left move
             if row + 1 < ROWS and col - 1 >= 0:
                 if self.board.board[row+1][col-1] == 0:
-                    possible_moves.append(f'-{row+1}{col-1}')
+                    possible_moves.append((row+1, col-1))
+
+            if king:
+                if row - 1 >= 0 and col + 1 >= 0:
+                    if self.board.board[row - 1][col + 1] == 0:
+                        possible_moves.append((row - 1, col + 1))
+                if row - 1 >= 0 and col - 1 >= 0:
+                    if self.board.board[row - 1][col - 1] == 0:
+                        possible_moves.append((row - 1, col - 1))
 
         else:
             # right move
             if row - 1 >= 0 and col + 1 < COLS:
                 if self.board.board[row - 1][col + 1] == 0:
-                    possible_moves.append(f'-{row - 1}{col + 1}')
+                    possible_moves.append((row - 1, col + 1))
             if row - 1 >= 0 and col - 1 >= 0:
                 if self.board.board[row - 1][col - 1] == 0:
-                    possible_moves.append(f'-{row - 1}{col - 1}')
+                    possible_moves.append((row - 1, col - 1))
+
+            if king:
+                if row + 1 < ROWS and col + 1 < COLS:
+                    if self.board.board[row - 1][col + 1] == 0:
+                        possible_moves.append((row - 1, col + 1))
+                if row + 1 < ROWS and col - 1 >= 0:
+                    if self.board.board[row + 1][col - 1] == 0:
+                        possible_moves.append((row + 1, col - 1))
 
         return possible_moves
 

@@ -1,6 +1,6 @@
 import pygame as pg
 from piece import Piece
-from constants import ROWS, COLS, SQUARE_SIZE, LIGHT_GREEN, BLACK, LIGHT_BROWN, BOARD_SIZE, COLOR_UP, COLOR_DOWN
+from constants import ROWS, COLS, SQUARE_SIZE, LIGHT_GREEN, BLACK, LIGHT_BROWN, BOARD_SIZE
 
 
 
@@ -24,6 +24,9 @@ class Board:
                     pg.draw.rect(surface, LIGHT_BROWN,
                                  (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
+
+
+
     def draw_possible_moves(self, moves):
         pass
 
@@ -31,7 +34,6 @@ class Board:
         row = (y // SQUARE_SIZE)
         col = (x // SQUARE_SIZE)
         return row, col
-
 
     def set_up_pieces(self):
         for row in range(ROWS):
